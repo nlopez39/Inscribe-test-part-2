@@ -4,21 +4,21 @@ Customer Engineer Exercise Part 2
 
 ## Introduction
 
-This a guide on how to get started with the Inscribe AI API for document fraud detection using Python
+This a guide on how to get started with the [Inscribe API](https://docs.inscribe.ai/reference/overview) for document fraud detection using Python
 
 ## Prerequisites
 
-Python 3.9+
+- Python 3.9+
 
-Install python dependencies
+- Install python dependencies
 
-```
-python -m pip install requests
-```
+  ```
+  python -m pip install requests
+  ```
 
 ## 1. Authentication and Credentials
 
-In order to use the API you will need to obtain your unique API key which is like a password that will be used to authenticate all of your requests.
+In order to use the API you will need to obtain your unique API key that will be used to authenticate all of your requests.
 
 ### How to obtain an API Key:
 
@@ -32,7 +32,7 @@ In order to use the API you will need to obtain your unique API key which is lik
 4. Copy and save it immediately - you will not be able to view it later.
 5. You can create as many secret tokens as you need. All of your created API keys are viewable on the [Settings -> API Keys](https://app.inscribe.ai/#/settings/api) page but you won't be able to reveal the values of these secret tokens.
 
-### Best Practices for Storing and Using API Keys
+### Storing your API Key:
 
 Use Environment Variables: Store your token in a `.env` file, not directly in your code.
 
@@ -40,38 +40,39 @@ Use Environment Variables: Store your token in a `.env` file, not directly in yo
 
 2. Inside the `.env` file, add your generated Inscribe API secret token and name it 'API_KEY'
 
-```
-API_KEY=INSCRIBE_API_SECRET_TOKEN_GOES_HERE
-```
+   ```
+   API_KEY=INSCRIBE_API_SECRET_TOKEN_GOES_HERE
+   ```
 
 3. Install `python-dotenv`:
 
-```
-pip install python-dotenv
-
-```
+   ```
+   pip install python-dotenv
+   ```
 
 4. Load the `.env` into your project
 
-```
-import requests
-import os
-from dotenv import load_dotenv
+   ```
+   import requests
+   import os
+   from dotenv import load_dotenv
 
-load_dotenv()
-api_key = os.getenv("API_KEY")
+   load_dotenv()
 
-headers = {
-    "accept": "application/json",
-    "Authorization": f"Inscribe {api_key}"
-}
+   #Read API_KEY from .env
+   api_key = os.getenv("API_KEY")
+
+   headers = {
+       "accept": "application/json",
+       "Authorization": f"Inscribe {api_key}"
+   }
 
 
-response = requests.get("https://api.inscribe.ai/api/v2/customers", headers=headers)
+   response = requests.get("https://api.inscribe.ai/api/v2/customers", headers=headers)
 
-print(response.text)
+   print(response.text)
 
-```
+   ```
 
 ## 2. Making the First Request
 
@@ -101,9 +102,9 @@ The request must include:
 | `company`       | The company associated with the customer record                                                                     |
 | `verify_entity` | Entities that are requested to be verified.                                                                         |
 
-### Example POST request to Create a Customer:
+### Example POST request to Create a Customer Folder:
 
-The code below shows how to create a customer with the following header and body parameters filled in
+The code below shows how to create a customer folder with the required header and body parameters filled in
 
 ```
 import requests
@@ -181,7 +182,7 @@ Inscribe fraud detection has coverage over all document types and languages
 
 ### Upload a Document:
 
-Follow these steps to upload a document to Inscribe for analysis:
+Follow these steps to upload a document to Inscribe API for analysis:
 
 1. **Get the Customer ID**
 
@@ -189,21 +190,19 @@ Follow these steps to upload a document to Inscribe for analysis:
 
 2. **Prepare the Endpoint**
 
-   Use the following endpoint to upload your document:
+   Use the following endpoint to upload your document. Replace `{customer_id}` with the actual `customer id`:
 
-```
-https://api.inscribe.ai/api/v2/customers/{customer_id}/documents
-```
+   ```
+   https://api.inscribe.ai/api/v2/customers/{customer_id}/documents
+   ```
 
-Replace `{customer_id}` with the actual `customer id`.
+3. **Prepare the Body Parameters**:
 
-3. **Prepare Body Parameters**:
-
-| Field             | Description                                                                                   |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| `file   `         | A list of files to be uploaded for analysis.                                                  |
-| `verify_entities` | Each verify_entity object in this array corresponds to a file in the above "files" parameter. |
-| `tags`            | Additional notes that you want to record about this customer.                                 |
+   | Field             | Description                                                                                   |
+   | ----------------- | --------------------------------------------------------------------------------------------- |
+   | `file   `         | A list of files to be uploaded for analysis.                                                  |
+   | `verify_entities` | Each verify_entity object in this array corresponds to a file in the above "files" parameter. |
+   | `tags`            | Additional notes that you want to record about this customer.                                 |
 
 **Tags:**
 
@@ -218,7 +217,7 @@ Inscribe can run verification checks against a document. Verification checks can
 - ID Number
 - Company
 
-Inscribe also supports the customisation of verification checks. Customized verification checks must be included under the strings field.
+Inscribe also supports the customisation of verification checks. Customized verification checks must be included under the strings field, as seen in the verify_entities variable in the snippet below.
 
 ### Example POST Request to Upload a Document:
 
@@ -264,11 +263,11 @@ with open(DOCUMENT_PATH, "rb") as document:
 
 ```
 
-### How to handle Successful Response vs Common Errors
+### Successful Response and Common Errors:
 
 Below is an example of a successful response with a status code of **202**. This indicates that the 'Bank Statement' (`john_smith_payslip_dec20.pdf`) document has been successfully processed for the customer named John Smith (`customer_id = 42`).
 
-It also shows that the document has been flagged as fraudulent, with a **trust score of 50**, a **quality score of 50** and **review status of ACCEPTED**
+It also shows that the document has been flagged as **fraudulent**, with a **trust score of 50**, a **quality score of 50** and **review status of ACCEPTED**
 
 ```
 {
@@ -339,38 +338,67 @@ Be sure to review the returned error message to help troubleshoot the issue effe
 
 ## 4. Next Steps
 
-### Possible Follow-Up Endpoints or Advanced Features
+### Webhooks
 
-In a production integration, webhooks can be used to be notified and act on a document that has finished processing.
+In a production integration, webhooks can be used to receive notifications and take immediate action once a document has finished processing.
 
-Implement webhooks to receive notifications about important events in real-time, such as document state changes, customer approval status changes, or completion of a collect session.
+Set up webhooks to listen for key events in real time, such as:
 
-The webhook feature will allow seamless integration with external systems, ensuring that updates are processed immediately without manual intervention.
+- Document state changes
 
-### Best Practices for Scaling or Automating the Process in Production
+- Customer approval status updates
 
-- Concurrency : Ensure that webhook payloads are handled concurrently without blocking other system processes. Use asynchronous methods and worker queues to manage high-volume notifications efficiently.
+- Completion of a collect session
 
-- Retries: In the event of a failure or an unreachable URL, implement a retry mechanism with exponential backoff to handle temporary outages or delays in processing.
+This approach allows seamless integration with external systems, ensuring updates are handled automatically without the need for manual review.
+
+For example, you can use Inscribe's "Document state changed minimal" [webhook event](https://docs.inscribe.ai/docs/getting-started-with-inscribe-webhooks#webhook-types) to provide immediate feedback to a user who may have submitted an incorrect document. This event includes valuable metadata such as:
+
+- Document type classification (bank statement, payslip, utility bill, etc.)
+
+- File type (True PDF, image, etc.)
+
+- Language
+
+- Quality score (readability/sharpness of the document)
+
+- Parsed details (e.g., name, address, date)
+
+With this data, your application can determine whether the submitted document meets your business rules. For instance, if your process only accepts bank statements from the last 90 days and a user uploads a 6-month-old document, your UI can alert them in near real time — improving efficiency and user satisfaction.
+
+This avoids delays that would otherwise occur if a support or underwriting team had to follow up manually via email, significantly improving conversion rates and the overall user experience.
+
+### Testing Webhooks
+
+Before going live, it's important to thoroughly test webhook integration to understand how Inscribe webhooks behave and what the structure of incoming data looks like.
+
+- Set up a test server to receive webhook payloads.This helps you inspect the request content and verify your implementation.
+
+- Validate signature checks locally to ensure security mechanisms are correctly configured.
+
+- Use tools like `ngrok` to expose a local server to the internet, allowing you to simulate real webhook deliveries to your development environment.
+
+- Simulate real scenarios, such as different document types or edge cases, to confirm your application responds appropriately in each case.
+
+By investing time in pre-production testing, you can confidently deploy a robust and secure webhook solution that supports real-time document processing at scale.
 
 **To Setup Webhooks check out this guide**: [Getting started with Webhooks](https://docs.inscribe.ai/docs/getting-started-with-inscribe-webhooks)
 
 ## 5. Security Considerations
 
-### How Inscribe handles data security ?
-
 In addition to being SOC II and ISO27001 certified, we store and encrypt all data securely in our VPC, and we never send PII to models that we don’t host ourselves.
 
-### Guidance for encryption in transit and at rest?
+Inscribe ensures data privacy through robust data encryption, access control, and compliance with data protection regulations to safeguard sensitive information used by their AI Risk Agents.
 
 ## 6. Troubleshooting & Support
 
-### Common issues (invalid tokens, 4xx/5xx errors, rate limits)
+### Common issues:
 
-1. **Invalid Tokens:**
+1. ### Invalid Tokens:
+
    An invalid token means the API cannot verify your application's identity or permissions.
 
-   **Causes:** Expired tokens, incorrect tokens, or tokens revoked by Inscribe AI.
+   - Causes: Expired tokens, incorrect tokens, or tokens revoked by Inscribe AI.
 
    **Troubleshooting:**
 
@@ -378,18 +406,19 @@ In addition to being SOC II and ISO27001 certified, we store and encrypt all dat
    Make sure you are using the correct token for your specific Inscribe AI account and application.
    If the token is expired, obtain a new token through [Settings -> API Keys](https://app.inscribe.ai/#/settings/api)
 
-2. **4xx Errors:**
+2. ### 4xx Errors:
+
    These errors indicate that the request is not valid or cannot be fulfilled due to client-side issues.
 
-   **400 Bad Request:** The request body is invalid or the request is not in the correct format.
+   - 400 Bad Request: The request body is invalid or the request is not in the correct format.
 
-   **401 Unauthorized:** The token is invalid or missing.
+   - 401 Unauthorized: The token is invalid or missing.
 
-   **403 Forbidden:** The application does not have permission to access the resource.
+   - 403 Forbidden: The application does not have permission to access the resource.
 
-   **404 Not Found:** The requested resource (API endpoint) does not exist.
+   - 404 Not Found: The requested resource (API endpoint) does not exist.
 
-   **429 Too Many Requests:** You have exceeded the rate limit for your account.
+   - 429 Too Many Requests:You have exceeded the rate limit for your account.
 
    **Troubleshooting:**
 
@@ -399,13 +428,13 @@ In addition to being SOC II and ISO27001 certified, we store and encrypt all dat
 
    If you're exceeding the rate limit, reduce the number of requests or wait for the rate limit to reset.
 
-3. **5xx Errors:**
+3. ### 5xx Errors:
 
    These errors indicate that the server has encountered an issue while processing the request.
 
-   **500 Internal Server Error:** A general server error.
+   - 500 Internal Server Error: A general server error.
 
-   **503 Service Unavailable:** The server is temporarily unavailable due to overload or maintenance.
+   - 503 Service Unavailable: The server is temporarily unavailable due to overload or maintenance.
 
    **Troubleshooting:**
 
@@ -415,10 +444,11 @@ In addition to being SOC II and ISO27001 certified, we store and encrypt all dat
 
    Implement exponential backoff to handle potential server-side issues.
 
-4. **Rate Limits:**
+4. ### Rate Limits:
+
    Rate limits are restrictions on the number of requests an application can make within a given time period.
 
-   **Causes:** Excessive API usage, potential misuse, or protecting Inscribe AI's infrastructure.
+   - Causes: Excessive API usage, potential misuse, or protecting Inscribe AI's infrastructure.
 
    **Troubleshooting:**
 
@@ -428,7 +458,7 @@ In addition to being SOC II and ISO27001 certified, we store and encrypt all dat
 
    Monitor your API usage to identify and address potential bottlenecks.
 
-### Where to reach out
+### How to reach us:
 
 Customer may initiate a helpdesk ticket any time by emailing intercom-support@inscribe.ai.
 
